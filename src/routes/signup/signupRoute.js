@@ -9,16 +9,13 @@ const signUpRoute = (request, response) => {
     request.on("data", function(data) {
       body = body + data;
 
-      console.log("Incoming data!!!!");
     });
 
     request.on("end", function() {
-      console.log(body);
       const post = JSON.parse(body);
-      console.log(post);
-      response.end(`{
+      response.end(JSON.stringify({
         "status": "success", 
-        "user":${body}}`);
+        "user": post }));
       saveUser(body);
     });
   }
