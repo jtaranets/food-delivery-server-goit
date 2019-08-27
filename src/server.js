@@ -4,8 +4,8 @@ const router = require("./routes/router");
 
 const startServer = port => {
   const server = http.createServer((request, response) => {
-    const parsedUrl = url.parse(request.url);
-    const func = router(parsedUrl.pathname)|| router.default;
+    request.parsedUrl = url.parse(request.url);
+    const func = router(request.parsedUrl.pathname);
     func(request, response);
   });
 

@@ -1,49 +1,25 @@
-const url = require("url");
-const fs = require("fs");
-
-const match = /products\/\d{8}/gm;
-const productRouter = require('./productRouter');
-const productIDRouter = require('./productIDRouter');
-
-const getId = reqUrl => {
-    const lastIndex = reqUrl.lastIndexOf('/');
-    if (lastIndex !== -1) {
-      return reqUrl.slice(lastIndex +1);
-    }
-  };
-
-  const urlPath = url => {
-    const parsedUrl = url.parse(url);
-    const urlID = getId(parsedUrl.pathname);
- const urlIDtoNum = parseInt(urlID);       
- return urlIDtoNum;
-  }
-
+const productsWithIDMatch = /products\/\d{8}/gm;
+const productRouter = require("./productRouter");
+const productIDRouter = require("./productIDRouter");
+const productIDsRouter = require("./productIDsRouter");
+const productCategoryRouter = require('./productCategoryRouter');
 
 const productHandler = (request, response) => {
-    const ourUrl = url.parse(request.url).pathname;
-console.log(ourUrl);
-    if(ourUrl === "/products"){
-        console.log('in products');
-        return productRouter;
-    }
-    else if(match.test(ourUrl)){
-        
-            response.writeHead(200, {"Content-Type": "application/json"});
-        
-            fs.readFile('./src/db/products/all-products.json', (err, data) => {
-                if(err){
-                  console.log(err);
-                }
-                const resultUrl = urlPath(request.url);       
-                const array = JSON.parse(data);
-                const result = array.find(el => el.id === resultUrl);
-                // console.log(result);
-                const resString = JSON.stringify(result);
-                response.end(resString);
-          
-          });
-    }
-}
+  if(request.method === 'GET'){
+  const ourUrl = request.parsedUrl.pathname;
+  if (ourUrl === "/products") {
+     productRouter(request, response);
+     return
+  } else if (productsWithIDMatch.test(ourUrl)) {
+    console.log('product with ID');
+    return productIDRouter(request, response);
+  }
+  else if(request.parsedUrl.query.includes('ids')){
+    return productIDsRouter(request, response);
+  }
+  else if(request.parsedUrl.query.includes('category')){
+    return productCategoryRouter(request, response)
+  }
+}};
 
-module.exports = productHandler
+module.exports = productHandler;

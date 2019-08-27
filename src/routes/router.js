@@ -1,9 +1,7 @@
 const mainRoute = require('./main/mainRouter');
-const productRouter = require('./product/productRouter');
 const signupRoute = require('./signup/signupRoute');
-const productIDRouter = require('./product/productIDRouter');
-const productIDsRouter = require('./product/productIDsRouter');
-const match = /products\/\d{8}/gm;
+const productHandler = require('./product/productHandler');
+const match = /\/products(\/\d{8})?(\/\?ids=(\d{8},?\s?)+)?/gm;
 
 const router = (url) => {
   if(url === "/"){
@@ -11,14 +9,12 @@ const router = (url) => {
   }
   else if (url === "/signup") {
     return signupRoute;
-  } else if(url === "/products"){
-return productRouter;
   }
   else if(match.test(url) ){
-    return productIDRouter;
+return productHandler;
   }
-  else if("/products/?ids='<19112831>, <19112832>"){
-    return productIDsRouter;
+  else{
+return mainRoute
   }
 }
 
