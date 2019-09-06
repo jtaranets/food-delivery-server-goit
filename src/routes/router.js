@@ -1,23 +1,20 @@
-const mainRoute = require('./main/mainRouter');
-const signupRoute = require('./signup/signupRoute');
-const productHandler = require('./product/productHandler');
-const match = /\/products(\/\d{8})?(\/\?ids=(\d{8},?\s?)+)?/gm;
+const mainRoute = require("./main/mainRouter");
+const userRoute = require("./users/userRoute");
+const userIDRoute = require("./users/userIDRoute")
+const signUpRoute = require("./signup/signUpRoute");
+const ordersRouter = require("./orders/ordersRouter")
+const productHandler = require("./product/productHandler");
+const imageRouter = require('./images/imagesRoute');
+const express = require("express");
+const router = express.Router();
 
-const router = (url) => {
-  if(url === "/"){
-    return mainRoute;
-  }
-  else if (url === "/signup") {
-    return signupRoute;
-  }
-  else if(match.test(url) ){
-return productHandler;
-  }
-  else{
-return mainRoute
-  }
-}
-
-
+router
+  .get("", mainRoute)
+  .post("/users", userRoute)
+  .get("/users/:id", userIDRoute)
+  .post("/orders", ordersRouter)
+  .post("/signup", signUpRoute)
+  .use("/products", productHandler)
+  .post("/images", imageRouter);
 
 module.exports = router;
