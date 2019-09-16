@@ -1,65 +1,44 @@
 const fs = require("fs");
 const fsPromise = fs.promises;
-const path = require("path");
-const uuid = require("uuid/v4");
+const User = require("../../modules/schema/userSchema");
 
 const userRoute = (request, response) => {
-  if (request.method === "POST") {
-    let body = "";
-    request.on("data", function(data) {
-      body = body + data;
-    });
+  let body = "";
+  request.on("data", function(data) {
+    body = body + data;
+  });
 
-    request.on("end", function() {
-      const client = JSON.parse(body);
-      client.id = uuid();
-      saveUser(client).then(data => {
-        if (client.checkResult) {
-          response.send(`Can't add user, ${client.checkResult}`);
-        } else {
-          response.setHeader("Content-Type", "application/json");
-          response.json({
-            status: "success",
-            user: client
-          });
-        }
-        response.end();
-      });
-    });
-  }
+  request.on("end", function() {
+    const client = JSON.parse(body);
+    // client.id = uuid();
+    saveUser(client, request, response);
+  });
 };
 
-saveUser = function(user) {
-  const pathToSave = `${__dirname}../../../db/users/all-users.json`;
-  const allUsers = fsPromise
-    .readFile(pathToSave, (err, data) => {
-      if (err) throw err;
-    })
-    .then(data => {
-      const string = data.toString();
-      if (string.length !== 0) {
-        return JSON.parse(string);
-      } else {
-        return [];
-      }
-    })
-    .then(res => {
-      if (res.length === 0) {
-        res.push(user);
-      } else {
-        const check = res.some(el => el.username === user.username);
-        if (check) {
-          user.checkResult = "SUCH USER ALREADY EXISTS";
-          return;
-        } else {
-          res.push(user);
-        }
-      }
-      const result = JSON.stringify(res);
-      fs.writeFile(pathToSave, result, (err, data) => {
-        if (err) throw err;
+saveUser = function(user, request, response) {
+  const match = User.findOne({ email: user.email }, (err, person) => {
+    if (err) throw err;
+  });
+
+  match.then(person => {
+    if (person) {
+      console.log("it matched");
+      response.setHeader("Content-Type", "application/json");
+      response.send("such user already exists");
+      response.end();
+    } else {
+      const usertoDB = new User(user);
+      usertoDB.save().then(() => {
+        response.setHeader("Content-Type", "application/json");
+        response.json({
+          status: "success",
+          user
+        });
+        console.log("New user created");
+        response.end();
       });
-    });
-  return allUsers;
+    }
+  });
+  return match;
 };
 module.exports = userRoute;
