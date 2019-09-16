@@ -19,24 +19,25 @@ const productIDRouter = (request, response) => {
     if (err) {
       console.log(err);
     }
-    const resultUrl = urlPath(request.parsedUrl);
+    const id = parseInt(request.params.name)
     const array = JSON.parse(data);
-    const result = array.find(el => el.id === resultUrl);
-    console.log(result);
+    const result = array.find(el => el.id === id);
     if (result) {
-  response.writeHead(200, { "Content-Type": "application/json" });
+      response.writeHead(200, { "Content-Type": "application/json" });
       const resString = JSON.stringify(result);
       response.end(`{
               "status": "success", 
               "products": ${resString}
              }`);
-    }
-    else{
-  response.writeHead(404, { "Content-Type": "text/html" });
-
-response.end('<h1>There is no such item</h1>')
+    } else {
+      response.writeHead(404, { "Content-Type": "text/html" });
+      response.end("<h1>There is no such item</h1>");
     }
   });
 };
 
 module.exports = productIDRouter;
+
+
+
+

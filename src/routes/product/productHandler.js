@@ -1,25 +1,31 @@
-const productsWithIDMatch = /products\/\d{8}/gm;
+// const productsWithIDMatch = /products\/\d{8}/gm;
+const productsWithIDsMatch = /products\?ids=((\d)*(\D)?)*/gm;
 const productRouter = require("./productRouter");
 const productIDRouter = require("./productIDRouter");
 const productIDsRouter = require("./productIDsRouter");
-const productCategoryRouter = require('./productCategoryRouter');
+const productCategoryRouter = require("./productCategoryRouter");
+const url = require("url");
+const express = require("express");
+const productHandler = express.Router();
 
-const productHandler = (request, response) => {
-  if(request.method === 'GET'){
-  const ourUrl = request.parsedUrl.pathname;
-  if (ourUrl === "/products") {
-     productRouter(request, response);
-     return
-  } else if (productsWithIDMatch.test(ourUrl)) {
-    console.log('product with ID');
-    return productIDRouter(request, response);
+const parseUrl = (req, res, next) => {
+  req.parsedUrl = url.parse(req.url);
+  next();
+};
+
+const foo = (req, res, next) => {
+  if (req.parsedUrl.path.includes("ids")) {
+    return productIDsRouter(req, res);
+  } else if (req.parsedUrl.path.includes("category")) {
+    return productCategoryRouter(req, res);
   }
-  else if(request.parsedUrl.query.includes('ids')){
-    return productIDsRouter(request, response);
-  }
-  else if(request.parsedUrl.query.includes('category')){
-    return productCategoryRouter(request, response)
-  }
-}};
+  next();
+};
+
+productHandler
+  .use(parseUrl)
+  .use(foo)
+  .get("", productRouter)
+  .get("/:name", productIDRouter);
 
 module.exports = productHandler;

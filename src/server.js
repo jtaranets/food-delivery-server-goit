@@ -1,15 +1,15 @@
-const http = require("http");
-const url = require("url");
 const router = require("./routes/router");
+const express = require("express");
+// const bodyParser = require("body-parser");
+const app = require("./modules/app");
 
 const startServer = port => {
-  const server = http.createServer((request, response) => {
-    request.parsedUrl = url.parse(request.url);
-    const func = router(request.parsedUrl.pathname);
-    func(request, response);
+  // app.use(bodyParser.json());
+  // app.use(express.urlencoded());
+  app.use("/", router);
+  app.listen(port, () => {
+    console.log(`server is listening on ${port} port`);
   });
-
-  server.listen(port);
 };
 
 module.exports = startServer;

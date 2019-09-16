@@ -3,7 +3,6 @@ const url = require("url");
 const readFile = fs.promises.readFile;
 
 const urlPath = urlFromReq => {
-  // const parsedUrl = url.parse(urlFromReq);
   const pattern = /\d{8}/gm;
   const result = urlFromReq.search.match(pattern);
   return result;
